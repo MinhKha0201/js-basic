@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 class="middle none center mr-4 rounded-lg bg-blue-500 py-3 px-6 font-sans text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/40 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 data-ripple-light="true"
                 >
-                 ${user.teams.length > 0 ? user.teams.length + " Selected" : "Select Team"}
+                 ${user.teams.length > 0 ? user.teams[0].name : "Select Team"}
                 </button>
               </td>
               <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
@@ -149,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
         count.innerText = "None Selected"
         console.log(appSelected);
     }
+
     DeleteAllButton.addEventListener("click", () => {
         DeleteAll()
     })
@@ -321,7 +322,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     trs.forEach(tr => {
                         body.removeChild(tr)
                     })
-                    console.log(usersData);
                     render(usersData)
                 })
             })
