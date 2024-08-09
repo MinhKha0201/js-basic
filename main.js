@@ -172,7 +172,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         appsData = [...appsDataTemp];
       }
-
+      if (appsData.filter((x) => !appSelected.includes(x)).length === 0) {
+        checkedAll.checked = true;
+      } else {
+        checkedAll.checked = false;
+      }
       if (appsData.length > 0) {
         re_renderAppsData(appsData, appSelected);
         checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
@@ -262,11 +266,15 @@ document.addEventListener("DOMContentLoaded", () => {
         checkboxes.forEach((checkbox) => {
           checkbox.checked = true;
         });
-        appSelected = [...appsData];
+
+        appSelected = [
+          ...appSelected,
+          ...appsData.filter(
+            (obj1) => !appSelected.some((obj2) => obj1.app_id === obj2.app_id)
+          ),
+        ];
         count.innerText = `${appSelected.length} Selected`;
-        appSelected.map((app) => {
-          addSelectedApp(app);
-        });
+        re_renderAppSelected(appSelected);
       } else {
         checkboxes.forEach((checkbox) => {
           checkbox.checked = false;
@@ -275,7 +283,10 @@ document.addEventListener("DOMContentLoaded", () => {
         lies.forEach((li) => {
           li.remove();
         });
-        appSelected = [];
+        appSelected = appSelected.filter((app1) => {
+          return !appsData.some((app2) => app2.app_id === app1.app_id);
+        });
+        re_renderAppSelected(appSelected);
         count.innerText =
           appSelected.length > 0
             ? `${appSelected.length} Selected`
@@ -293,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
               ? `${appSelected.length} Selected`
               : "None Selected";
           checkboxes.forEach((checkbox) => {
-            console.log(checkbox.getAttribute("id"));
             if (appId === checkbox.getAttribute("id")) {
               checkbox.checked = false;
             }
@@ -324,26 +334,28 @@ document.addEventListener("DOMContentLoaded", () => {
           );
           appsSelectedList.removeChild(li[0]);
         }
-        const buttons = appsSelectedList.querySelectorAll("button");
-        for (let button of buttons) {
-          button.addEventListener("click", (event) => {
-            const appId = event.target.getAttribute("app-id");
-            appSelected = appSelected.filter((app) => app.app_id !== appId);
-            checkedAll.checked = false;
-            event.target.parentNode.remove();
-            count.innerText =
-              appSelected.length > 0
-                ? `${appSelected.length} Selected`
-                : "None Selected";
-            checkboxes.forEach((checkbox) => {
-              if (appId === checkbox.getAttribute("id")) {
-                checkbox.checked = false;
-              }
-            });
-          });
-        }
       });
     });
+
+    const buttons = appsSelectedList.querySelectorAll("button");
+    for (let button of buttons) {
+      button.addEventListener("click", (event) => {
+        console.log(1);
+        const appId = event.target.getAttribute("app-id");
+        appSelected = appSelected.filter((app) => app.app_id !== appId);
+        checkedAll.checked = false;
+        event.target.parentNode.remove();
+        count.innerText =
+          appSelected.length > 0
+            ? `${appSelected.length} Selected`
+            : "None Selected";
+        checkboxes.forEach((checkbox) => {
+          if (appId === checkbox.getAttribute("id")) {
+            checkbox.checked = false;
+          }
+        });
+      });
+    }
 
     confirm.addEventListener("click", (event) => {
       confirm.innerText = "Loading...";
@@ -373,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     teamModal.style.display = "none";
 
-    window.onclick = function (event) {
+    teamModal.onclick = function (event) {
       if (event.target == teamModal) teamModalClose();
     };
   }
@@ -409,7 +421,6 @@ document.addEventListener("DOMContentLoaded", () => {
         )
         .join("")}</ul>`;
       const buttons = teamsList.querySelectorAll("button");
-      console.log(buttons);
       buttons.forEach((button) => {
         button.addEventListener("click", (event) => {
           const userId = event.target.getAttribute("user-id");
@@ -439,10 +450,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     elements.onclick = (e) => appModalClose();
 
-    teamModal.style.display = "none";
+    appModal.style.display = "none";
 
-    window.onclick = function (event) {
-      if (event.target == teamModal) appModalClose();
+    appModal.onclick = function (event) {
+      if (event.target == appModal) appModalClose();
     };
   }
 });
