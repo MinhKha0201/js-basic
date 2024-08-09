@@ -151,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.querySelector("#search");
     var checkboxes;
     var checkedAll;
+    var searchValue = "";
 
     const user = usersData.filter((user) => user.id === parseInt(userId));
     appSelected = [...user[0].apps];
@@ -161,8 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const appsDataTemp = [...appsData];
 
+    searchInput.value = searchValue;
     searchInput.addEventListener("keyup", (event) => {
-      let searchValue = event.target.value;
+      searchValue = event.target.value;
       if (searchValue.trim() !== "") {
         appsData = appsDataTemp.filter((app) =>
           app.name.toLowerCase().includes(searchValue.toLowerCase())
@@ -175,59 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
         re_renderAppsData(appsData, appSelected);
         checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
         checkedAll = document.querySelector("#all");
-        var isCheckedAll;
 
-        checkedAll.checked = isCheckedAll;
-        checkedAll.addEventListener("change", (e) => {
-          isCheckedAll = e.target.checked;
-          if (isCheckedAll) {
-            checkboxes.forEach((checkbox) => {
-              checkbox.checked = true;
-            });
-            appSelected = [...appsData];
-            count.innerText = `${appSelected.length} Selected`;
-            re_renderAppSelected(appSelected);
-          } else {
-            checkboxes.forEach((checkbox) => {
-              checkbox.checked = false;
-            });
-            const lies = document.querySelectorAll("#app-selected-list>li");
-            lies.forEach((li) => {
-              li.remove();
-            });
-            appSelected = [];
-            count.innerText =
-              appSelected.length > 0
-                ? `${appSelected.length} Selected`
-                : "None Selected";
-          }
-          const buttons = appsSelectedList.querySelectorAll("button");
-          for (let button of buttons) {
-            button.addEventListener("click", (event) => {
-              const appId = event.target.getAttribute("app-id");
-              appSelected = appSelected.filter((app) => app.app_id !== appId);
-              checkedAll.checked = false;
-              event.target.parentNode.remove();
-              count.innerText =
-                appSelected.length > 0
-                  ? `${appSelected.length} Selected`
-                  : "None Selected";
-              checkboxes.forEach((checkbox) => {
-                if (appId === checkbox.getAttribute("app-id")) {
-                  checkbox.checked = false;
-                }
-              });
-            });
-          }
-        });
-
-        for (let checkbox of checkboxes) {
-          if (checkbox.checked === false) {
-            isCheckedAll = false;
-            break;
-          }
-        }
-        // checkbox
         checkboxes.forEach((checkbox) => {
           checkbox.addEventListener("change", (event) => {
             const isChecked = event.target.checked;
@@ -261,8 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
                   appSelected.length > 0
                     ? `${appSelected.length} Selected`
                     : "None Selected";
+
                 checkboxes.forEach((checkbox) => {
-                  if (appId === checkbox.getAttribute("app-id")) {
+                  if (appId === checkbox.getAttribute("id")) {
                     checkbox.checked = false;
                   }
                 });
@@ -271,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
       } else {
-        console.log(1);
         re_renderAppsData(appsData, appSelected);
       }
     });
@@ -413,6 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         render(usersData);
       }, 1000);
+      searchValue = "";
     });
   };
 
