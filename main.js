@@ -92,10 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const ids1 = appSelected.map((item) => item.app_id);
     appsData.forEach((app) => {
       if (ids1.length && ids1.includes(app.app_id)) {
-        appsList.innerHTML += `<li class="flex gap-2 p-4"><input app-id="${app.app_id}" id="${app.app_id}" checked type="checkbox"
+        appsList.innerHTML += `<li class="flex gap-2 p-4"><input id="${app.app_id}" checked type="checkbox"
                     ><label for="${app.app_id}">${app.name}</label></li>`;
       } else {
-        appsList.innerHTML += `<li class="flex gap-2 p-4"><input app-id="${app.app_id}" id="${app.app_id}" type="checkbox"
+        appsList.innerHTML += `<li class="flex gap-2 p-4"><input id="${app.app_id}" type="checkbox"
                     ><label for="${app.app_id}">${app.name}</label></li>`;
       }
     });
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     appsSelectedList.innerHTML += `<li class="${app.app_id} flex justify-between p-4 items-center">
                                                 <p class="max-w-[200px] text-wrap">
                                                 ${app.name}</p>
-                                                <button app-id="${app.app_id}" class="text-red-500">Delete</button>
+                                                <button id="${app.app_id}" app-id="${app.app_id}" class="text-red-500">Delete</button>
                                             </li>`;
   };
 
@@ -149,6 +149,8 @@ document.addEventListener("DOMContentLoaded", () => {
     appModal.style.display = "flex";
     confirm.setAttribute("user-id", userId);
     const searchInput = document.querySelector("#search");
+    var checkboxes;
+    var checkedAll;
 
     const user = usersData.filter((user) => user.id === parseInt(userId));
     appSelected = [...user[0].apps];
@@ -158,11 +160,9 @@ document.addEventListener("DOMContentLoaded", () => {
         : "None Selected";
 
     const appsDataTemp = [...appsData];
-    var searchValue = "";
 
-    searchInput.setAttribute("value", searchValue);
     searchInput.addEventListener("keyup", (event) => {
-      searchValue = event.target.value;
+      let searchValue = event.target.value;
       if (searchValue.trim() !== "") {
         appsData = appsDataTemp.filter((app) =>
           app.name.toLowerCase().includes(searchValue.toLowerCase())
@@ -170,60 +170,86 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         appsData = [...appsDataTemp];
       }
-      var lies1 = appsList.querySelectorAll("li");
-      lies1.forEach((li) => {
-        appsList.removeChild(li);
-      });
 
-      re_renderAppsData(appsData, appSelected);
+      if (appsData.length > 0) {
+        re_renderAppsData(appsData, appSelected);
+        checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
+        checkedAll = document.querySelector("#all");
+        var isCheckedAll;
 
-      const checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
-      const checkedAll = document.querySelector("#all");
-      var isCheckedAll;
-
-      checkedAll.checked = isCheckedAll;
-      checkedAll.addEventListener("change", (e) => {
-        isCheckedAll = e.target.checked;
-        if (isCheckedAll) {
-          checkboxes.forEach((checkbox) => {
-            checkbox.checked = true;
-          });
-          appSelected = [...appsData];
-          count.innerText = `${appSelected.length} Selected`;
-          renderAppSelected(appSelected);
-        } else {
-          checkboxes.forEach((checkbox) => {
-            checkbox.checked = false;
-          });
-          const lies = document.querySelectorAll("#app-selected-list>li");
-          lies.forEach((li) => {
-            li.remove();
-          });
-          appSelected = [];
-          count.innerText =
-            appSelected.length > 0
-              ? `${appSelected.length} Selected`
-              : "None Selected";
-        }
-      });
-
-      for (let checkbox of checkboxes) {
-        if (checkbox.checked === false) {
-          isCheckedAll = false;
-          break;
-        }
-      }
-      // checkbox
-      checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-          const isChecked = event.target.checked;
-          const appId = event.target.getAttribute("app-id");
-          const app = appsData.filter((app) => app.app_id === appId);
-          if (isChecked) {
-            appSelected = [...appSelected, ...app];
+        checkedAll.checked = isCheckedAll;
+        checkedAll.addEventListener("change", (e) => {
+          isCheckedAll = e.target.checked;
+          if (isCheckedAll) {
+            checkboxes.forEach((checkbox) => {
+              checkbox.checked = true;
+            });
+            appSelected = [...appsData];
             count.innerText = `${appSelected.length} Selected`;
-            addSelectedApp(app[0]);
+            re_renderAppSelected(appSelected);
+          } else {
+            checkboxes.forEach((checkbox) => {
+              checkbox.checked = false;
+            });
+            const lies = document.querySelectorAll("#app-selected-list>li");
+            lies.forEach((li) => {
+              li.remove();
+            });
+            appSelected = [];
+            count.innerText =
+              appSelected.length > 0
+                ? `${appSelected.length} Selected`
+                : "None Selected";
+          }
+          const buttons = appsSelectedList.querySelectorAll("button");
+          for (let button of buttons) {
+            button.addEventListener("click", (event) => {
+              const appId = event.target.getAttribute("app-id");
+              appSelected = appSelected.filter((app) => app.app_id !== appId);
+              checkedAll.checked = false;
+              event.target.parentNode.remove();
+              count.innerText =
+                appSelected.length > 0
+                  ? `${appSelected.length} Selected`
+                  : "None Selected";
+              checkboxes.forEach((checkbox) => {
+                if (appId === checkbox.getAttribute("app-id")) {
+                  checkbox.checked = false;
+                }
+              });
+            });
+          }
+        });
 
+        for (let checkbox of checkboxes) {
+          if (checkbox.checked === false) {
+            isCheckedAll = false;
+            break;
+          }
+        }
+        // checkbox
+        checkboxes.forEach((checkbox) => {
+          checkbox.addEventListener("change", (event) => {
+            const isChecked = event.target.checked;
+            const appId = event.target.getAttribute("id");
+            const app = appsData.filter((app) => app.app_id === appId);
+            if (isChecked) {
+              appSelected = [...appSelected, ...app];
+              count.innerText = `${appSelected.length} Selected`;
+              addSelectedApp(app[0]);
+            } else {
+              appSelected = appSelected.filter((app) => app.app_id !== appId);
+              checkedAll.checked = false;
+              count.innerText =
+                appSelected.length > 0
+                  ? `${appSelected.length} Selected`
+                  : "None Selected";
+              const li = appsSelectedList.getElementsByClassName(
+                `${app[0].app_id}`
+              );
+              console.log(li);
+              appsSelectedList.removeChild(li[0]);
+            }
             const buttons = appsSelectedList.querySelectorAll("button");
             for (let button of buttons) {
               button.addEventListener("click", (event) => {
@@ -242,48 +268,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
               });
             }
-          } else {
-            appSelected = appSelected.filter((app) => app.app_id !== appId);
-            checkedAll.checked = false;
-            count.innerText =
-              appSelected.length > 0
-                ? `${appSelected.length} Selected`
-                : "None Selected";
-            const li = appsSelectedList.getElementsByClassName(
-              `${app[0].app_id}`
-            );
-            console.log(li);
-            appsSelectedList.removeChild(li[0]);
-          }
+          });
         });
-      });
+      } else {
+        console.log(1);
+        re_renderAppsData(appsData, appSelected);
+      }
     });
 
     re_renderAppsData(appsData, appSelected);
     re_renderAppSelected(appSelected);
 
-    const checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
-    const checkedAll = document.querySelector("#all");
+    checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
+    checkedAll = document.querySelector("#all");
     var isCheckedAll = true;
-
-    const buttons = appsSelectedList.querySelectorAll("button");
-    for (let button of buttons) {
-      button.addEventListener("click", (event) => {
-        const appId = event.target.getAttribute("app-id");
-        appSelected = appSelected.filter((app) => app.app_id !== appId);
-        checkedAll.checked = false;
-        event.target.parentNode.remove();
-        count.innerText =
-          appSelected.length > 0
-            ? `${appSelected.length} Selected`
-            : "None Selected";
-        checkboxes.forEach((checkbox) => {
-          if (appId === checkbox.getAttribute("app-id")) {
-            checkbox.checked = false;
-          }
-        });
-      });
-    }
 
     const DeleteAll = () => {
       const lies = document.querySelectorAll("#app-selected-list>li");
@@ -334,36 +332,37 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `${appSelected.length} Selected`
             : "None Selected";
       }
+      const buttons = appsSelectedList.querySelectorAll("button");
+      for (let button of buttons) {
+        button.addEventListener("click", (event) => {
+          const appId = event.target.getAttribute("app-id");
+          appSelected = appSelected.filter((app) => app.app_id !== appId);
+          checkedAll.checked = false;
+          event.target.parentNode.remove();
+          count.innerText =
+            appSelected.length > 0
+              ? `${appSelected.length} Selected`
+              : "None Selected";
+          checkboxes.forEach((checkbox) => {
+            console.log(checkbox.getAttribute("id"));
+            if (appId === checkbox.getAttribute("id")) {
+              checkbox.checked = false;
+            }
+          });
+        });
+      }
     });
 
     // checkbox
     checkboxes.forEach((checkbox) => {
       checkbox.addEventListener("change", (event) => {
         const isChecked = event.target.checked;
-        const appId = event.target.getAttribute("app-id");
+        const appId = event.target.getAttribute("id");
         const app = appsData.filter((app) => app.app_id === appId);
         if (isChecked) {
           appSelected = [...appSelected, ...app];
           count.innerText = `${appSelected.length} Selected`;
           addSelectedApp(app[0]);
-          const buttons = appsSelectedList.querySelectorAll("button");
-          for (let button of buttons) {
-            button.addEventListener("click", (event) => {
-              const appId = event.target.getAttribute("app-id");
-              appSelected = appSelected.filter((app) => app.app_id !== appId);
-              checkedAll.checked = false;
-              event.target.parentNode.remove();
-              count.innerText =
-                appSelected.length > 0
-                  ? `${appSelected.length} Selected`
-                  : "None Selected";
-              checkboxes.forEach((checkbox) => {
-                if (appId === checkbox.getAttribute("app-id")) {
-                  checkbox.checked = false;
-                }
-              });
-            });
-          }
         } else {
           appSelected = appSelected.filter((app) => app.app_id !== appId);
           checkedAll.checked = false;
@@ -374,11 +373,29 @@ document.addEventListener("DOMContentLoaded", () => {
           const li = appsSelectedList.getElementsByClassName(
             `${app[0].app_id}`
           );
-          console.log(li);
           appsSelectedList.removeChild(li[0]);
+        }
+        const buttons = appsSelectedList.querySelectorAll("button");
+        for (let button of buttons) {
+          button.addEventListener("click", (event) => {
+            const appId = event.target.getAttribute("app-id");
+            appSelected = appSelected.filter((app) => app.app_id !== appId);
+            checkedAll.checked = false;
+            event.target.parentNode.remove();
+            count.innerText =
+              appSelected.length > 0
+                ? `${appSelected.length} Selected`
+                : "None Selected";
+            checkboxes.forEach((checkbox) => {
+              if (appId === checkbox.getAttribute("id")) {
+                checkbox.checked = false;
+              }
+            });
+          });
         }
       });
     });
+
     confirm.addEventListener("click", (event) => {
       confirm.innerText = "Loading...";
       setTimeout(() => {
