@@ -176,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (appsData.length > 0) {
         re_renderAppsData(appsData, appSelected);
         checkboxes = document.querySelectorAll('li>input[type="checkbox"]');
-        checkedAll = document.querySelector("#all");
 
         checkboxes.forEach((checkbox) => {
           checkbox.addEventListener("change", (event) => {
