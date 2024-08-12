@@ -2,12 +2,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const usersApi = "https://admob.lutech.vn/api/users";
   const teamsApi = "https://admob.lutech.vn/api/teams";
   const appsApi = "https://admob.lutech.vn/api/apps";
+  var currentPage = 1;
   var usersData = [];
   var appSelected = [];
   var teamSelected = [];
   var appsData = [];
 
   const render = (usersData) => {
+    const trs = body.querySelectorAll("tr");
+    trs.forEach((tr) => {
+      body.removeChild(tr);
+    });
+
     usersData.map((user) => {
       body.innerHTML += `<tr class="bg-gray-100 border-b">
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${
@@ -45,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const teamButtons = document.querySelectorAll("#button-team");
     teamButtons.forEach((button) => {
       button.addEventListener("click", (event) => {
-        // Lấy giá trị của thuộc tính data-id của nút đã bấm
         const teamId = event.target.getAttribute("team-id");
         const userId = event.target.getAttribute("user-id");
         teamOpenModal(teamId, userId);
@@ -70,23 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const DeleteAllButton = document.querySelector("#delete-all");
   const count = document.querySelector("#count");
   const confirm = document.querySelector("#confirm");
-
-  const fetchData = async () => {
-    try {
-      const usersResponse = await fetch(usersApi);
-      const usersJson = await usersResponse.json();
-      usersData = [...usersJson.data];
-
-      const appsResponse = await fetch(appsApi);
-      appsData = await appsResponse.json();
-
-      render(usersData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  fetchData();
+  const prevBtn = document.querySelector("#prev-btn");
+  const nextBtn = document.querySelector("#next-btn");
 
   const renderAppsData = (appsData, appSelected) => {
     const ids1 = appSelected.map((item) => item.app_id);
@@ -134,6 +124,37 @@ document.addEventListener("DOMContentLoaded", () => {
                                                 <button id="${app.app_id}" app-id="${app.app_id}" class="text-red-500">Delete</button>
                                             </li>`;
   };
+
+  const fetchData = async (page) => {
+    try {
+      const apiUrl = usersApi + `?page=${page}`;
+      const usersResponse = await fetch(apiUrl);
+      const usersJson = await usersResponse.json();
+      usersData = [...usersJson.data];
+
+      const appsResponse = await fetch(appsApi);
+      appsData = await appsResponse.json();
+
+      render(usersData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  prevBtn.addEventListener("click", (event) => {
+    if (currentPage > 1) {
+      currentPage = currentPage - 1;
+      fetchData(currentPage);
+    }
+  });
+  nextBtn.addEventListener("click", (event) => {
+    if (currentPage < 2) {
+      currentPage = currentPage + 1;
+      fetchData(currentPage);
+    }
+  });
+
+  fetchData(currentPage);
 
   const appModalClose = () => {
     appModal.classList.remove("fadeIn");
