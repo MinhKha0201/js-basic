@@ -108,29 +108,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
       .join("");
     appsSelectedList.innerHTML = html;
-
-    // const buttons = appsSelectedList.querySelectorAll("button");
-    // for (let button of buttons) {
-    //   button.addEventListener("click", (event) => {
-    //     const appId = event.target.getAttribute("app-id");
-    //     appSelected = appSelected.filter((app) => app.app_id !== appId);
-    //     checkedAll.indeterminate = true;
-    //     checkedAll.checked = false;
-    //     if (appSelected.length < 1) {
-    //       checkedAll.indeterminate = false;
-    //     }
-    //     event.target.parentNode.remove();
-    //     count.innerText =
-    //       appSelected.length > 0
-    //         ? `${appSelected.length} Selected`
-    //         : "None Selected";
-    //     checkboxes.forEach((checkbox) => {
-    //       if (appId === checkbox.getAttribute("id")) {
-    //         checkbox.checked = false;
-    //       }
-    //     });
-    //   });
-    // }
   };
 
   const appModalClose = () => {
@@ -162,7 +139,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     searchInput.value = searchValue;
     searchInput.addEventListener("keyup", (event) => {
-      console.log(appSelected);
       searchValue = event.target.value;
       if (searchValue.trim() !== "") {
         appsData = appsDataTemp.filter((app) =>
